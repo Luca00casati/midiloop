@@ -39,8 +39,8 @@ unsigned int read_varlen(FILE *f) {
 }
 
 // --- Record mode ---
-int do_record(libusb_device_handle *devh) {
-    FILE *midi_f = fopen("record.mid", "wb");
+int do_record(libusb_device_handle *devh, char* file) {
+    FILE *midi_f = fopen(file, "wb");
     if (!midi_f) { perror("Cannot create MIDI file"); return 1; }
 
     uint16_t ppq = 480;
@@ -132,8 +132,8 @@ int do_record(libusb_device_handle *devh) {
 }
 
 // --- Playback mode ---
-int do_play(libusb_device_handle *devh, bool loop) {
-    FILE *midi_f = fopen("record.mid", "rb");
+int do_play(libusb_device_handle *devh, char* file, bool loop) {
+    FILE *midi_f = fopen(file, "rb");
     if (!midi_f) { perror("Cannot open record.mid"); return 1; }
 
     uint16_t ppq = 480;
@@ -199,8 +199,8 @@ int do_play(libusb_device_handle *devh, bool loop) {
 
 // --- Main ---
 int main(int argc, char **argv) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s -rec | -play | -playloop\n", argv[0]);
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s [-rec | -play | -playloop] file\n", argv[0]);
         return 1;
     }
 
@@ -223,11 +223,11 @@ int main(int argc, char **argv) {
 
     int rc = 0;
     if (strcmp(argv[1], "-rec") == 0) {
-        rc = do_record(devh);
+        rc = do_record(devh, argv[2]);
     } else if (strcmp(argv[1], "-play") == 0) {
-        rc = do_play(devh, false);
+        rc = do_play(devh, argv[2], false);
     } else if (strcmp(argv[1], "-playloop") == 0) {
-        rc = do_play(devh, true);
+        rc = do_play(devh, argv[2], true);
     } else {
         fprintf(stderr, "Unknown option: %s\n", argv[1]);
         rc = 1;
